@@ -6,13 +6,16 @@ using UnityEngine.Tilemaps;
 public class ProceduralGeneration : MonoBehaviour
 {
     public int width;
-    public bool showNoiseMap;
+    public bool showNoiseMap, generateCaves;
     //public GameObject dirt, grass, stone, ore;
-    public Tilemap dirtTilemap, grassTilemap, stoneTilemap, noiseTilemap;
-    public Tile dirt, grass, stone, noise;
+    public Tilemap dirtTilemap, grassTilemap, stoneTilemap, caveTilemap, noiseTilemap;
+    public Tile dirt, grass, stone, cave, noise;
     [Range(1, 150)]
     public float height, smoothness;
     float seed;
+    [Range(0, 1)]
+    public float caveRange;
+    public float caveCheck;
     // Start is called before the first frame update
     void Start()
     {
@@ -29,6 +32,7 @@ public class ProceduralGeneration : MonoBehaviour
             dirtTilemap.ClearAllTiles();
             grassTilemap.ClearAllTiles();
             noiseTilemap.ClearAllTiles();
+            caveTilemap.ClearAllTiles();
             generateSeed();
             generation();
         }
@@ -57,14 +61,14 @@ public class ProceduralGeneration : MonoBehaviour
             int max_stone_spawn = cur_height - 5;
             int min_stone_spawn = cur_height - 8;
             int stone_spawn = Random.Range(min_stone_spawn, max_stone_spawn);
-            int max_ore_spawn = cur_height - 8;
+            int max_cave_spawn = Mathf.RoundToInt(cur_height / 1.3f)-5;
 
             if (showNoiseMap)
             {
                 for (int n = Mathf.RoundToInt(height + 15); n < Mathf.RoundToInt(height + 55); n++)
                 {
-                    // tests for fun
-                    //int testvalue = Mathf.RoundToInt(height * Mathf.PerlinNoise((x+(n/(height+15))) / smoothness, seed));
+                    // tests for fun CAVE GENERATION!
+                    //int testvalue = Mathf.RoundToInt(height * Mathf.PerlinNoise((x+seed) / smoothness, (n+seed) / smoothness));
                     //float shade = testvalue / height;
 
                     //spawn noise map tile at x=x, y=n with color = cur_height/height?
@@ -77,13 +81,14 @@ public class ProceduralGeneration : MonoBehaviour
 
             for (int y = 0; y < cur_height; y++) // manages vertical generation
             {
-                int is_ore = Random.Range(0, 12);
                 if (y < stone_spawn)
                 {
-                    if (is_ore == 1 && y < max_ore_spawn)
+                    float caveValue = Mathf.PerlinNoise(x*caveRange + seed, y*caveRange + seed);
+                    if (caveValue <= caveCheck && y < max_cave_spawn && generateCaves)
                     {
-                        //spawnObj(ore, x, y);
-                        stoneTilemap.SetTile(new Vector3Int(x, y, 0), stone); // spawning stone instead of ore right now
+                        //spawn nothing
+                        //stoneTilemap.SetTile(new Vector3Int(x, y, 0), stone); // spawning stone instead of ore right now
+                        caveTilemap.SetTile(new Vector3Int(x, y, 0), cave);
                     } else
                     {
                         //spawnObj(stone, x, y);
