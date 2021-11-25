@@ -6,16 +6,16 @@ using UnityEngine.Tilemaps;
 public class ProceduralGeneration : MonoBehaviour
 {
     public int width;
-    public bool showNoiseMap, generateCaves;
+    public bool showNoiseMap, generateCaves, generateOre;
     //public GameObject dirt, grass, stone, ore;
-    public Tilemap dirtTilemap, grassTilemap, stoneTilemap, caveTilemap, noiseTilemap;
-    public Tile dirt, grass, stone, cave, noise;
+    public Tilemap dirtTilemap, grassTilemap, stoneTilemap, caveTilemap, oreTilemap, noiseTilemap;
+    public Tile dirt, grass, stone, cave, ore, noise;
     [Range(1, 150)]
     public float height, smoothness;
     float seed;
     [Range(0, 1)]
-    public float caveRange;
-    public float caveCheck;
+    public float caveRange, oreRange;
+    public float caveCheck, oreCheck;
     // Start is called before the first frame update
     void Start()
     {
@@ -33,6 +33,7 @@ public class ProceduralGeneration : MonoBehaviour
             grassTilemap.ClearAllTiles();
             noiseTilemap.ClearAllTiles();
             caveTilemap.ClearAllTiles();
+            oreTilemap.ClearAllTiles();
             generateSeed();
             generation();
         }
@@ -83,13 +84,19 @@ public class ProceduralGeneration : MonoBehaviour
             {
                 if (y < stone_spawn)
                 {
-                    float caveValue = Mathf.PerlinNoise(x*caveRange + seed, y*caveRange + seed);
+                    float caveValue = Mathf.PerlinNoise(x * caveRange + seed, y * caveRange + seed);
+                    float oreValue = Mathf.PerlinNoise(x * oreRange + seed, y * oreRange + seed);
                     if (caveValue <= caveCheck && y < max_cave_spawn && generateCaves)
                     {
                         //spawn nothing
                         //stoneTilemap.SetTile(new Vector3Int(x, y, 0), stone); // spawning stone instead of ore right now
                         caveTilemap.SetTile(new Vector3Int(x, y, 0), cave);
-                    } else
+                    } else if (oreValue <= oreCheck && y< max_cave_spawn && generateOre)
+                    {
+                        oreTilemap.SetTile(new Vector3Int(x, y, 0), ore);
+                    }
+                    
+                    else
                     {
                         //spawnObj(stone, x, y);
                         stoneTilemap.SetTile(new Vector3Int(x, y, 0), stone);
