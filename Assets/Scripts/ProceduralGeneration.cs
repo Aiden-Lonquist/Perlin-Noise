@@ -6,13 +6,20 @@ using UnityEngine.Tilemaps;
 public class ProceduralGeneration : MonoBehaviour
 {
     public int width;
-    public bool showNoiseMap, generateCaves, generateOre;
+    
+    public bool showNoiseMap, generateCaves, generateOre, showCaveNoiseMap;
+    
     //public GameObject dirt, grass, stone, ore;
+    
     public Tilemap dirtTilemap, grassTilemap, stoneTilemap, caveTilemap, oreTilemap, noiseTilemap;
+    
     public Tile dirt, grass, stone, cave, ore, noise;
+    
     [Range(1, 150)]
     public float height, smoothness;
+    
     float seed;
+    
     [Range(0, 1)]
     public float caveRange, oreRange;
     public float caveCheck, oreCheck;
@@ -86,6 +93,16 @@ public class ProceduralGeneration : MonoBehaviour
                 {
                     float caveValue = Mathf.PerlinNoise(x * caveRange + seed, y * caveRange + seed);
                     float oreValue = Mathf.PerlinNoise(x * oreRange + seed, y * oreRange + seed);
+
+                    if (showCaveNoiseMap && generateCaves)
+                    {
+                        int caveMapHeight = Mathf.RoundToInt(height + 15 + y);
+                        noiseTilemap.SetTile(new Vector3Int(x, caveMapHeight, 0), noise);
+                        noiseTilemap.SetTileFlags(new Vector3Int(x, caveMapHeight, 0), TileFlags.None);
+                        float shade = caveValue;
+                        noiseTilemap.SetColor(new Vector3Int(x, caveMapHeight, 0), new Color(shade, shade, shade));
+                    }
+
                     if (caveValue <= caveCheck && y < max_cave_spawn && generateCaves)
                     {
                         //spawn nothing
